@@ -1,194 +1,306 @@
-// Danh sách thiết bị Smart Home
-const devices = [
+
+"use strict";
+
+// Danh sach thue bao ban dau
+const subscriptions = [
     {
-        id: "DEV_001",
-        name: "Smart TV",
-        room: "Phong khach",
-        isActive: true,
-        powerWatts: 120
+        subscriptionId: "SUB_001",
+        customerName: "Nguyen Van An",
+        planTier: "PERSONAL",
+        deviceLimit: 1,
+        status: "ACTIVE"
     },
     {
-        id: "DEV_002",
-        name: "Den ngu",
-        room: "Phong ngu",
-        isActive: false,
-        powerWatts: 20
+        subscriptionId: "SUB_002",
+        customerName: "Tran Thi Mai",
+        planTier: "FAMILY",
+        deviceLimit: 5,
+        status: "ACTIVE"
     },
     {
-        id: "DEV_003",
-        name: "Dieu hoa",
-        room: "Phong ngu",
-        isActive: true,
-        powerWatts: 1000
+        subscriptionId: "SUB_003",
+        customerName: "Le Minh Cuong",
+        planTier: "PERSONAL",
+        deviceLimit: 1,
+        status: "ACTIVE"
     }
 ];
 
-// Validator: kiểm tra dữ liệu thiết bị
-const validateDevice = (device) => {
-    if (!device.name || device.name.trim() === "") {
-        return false;
-    }
+// Gioi han thiet bi theo goi
+const PERSONAL_DEVICE_LIMIT = 1;
+const FAMILY_DEVICE_LIMIT = 5;
 
-    if (!device.room || device.room.trim() === "") {
-        return false;
-    }
+// Bien dem tao ma thue bao
+let subscriptionCounter = 4;
 
-    if (typeof device.powerWatts !== "number" || device.powerWatts <= 0) {
-        return false;
-    }
-
-    return true;
-};
-
-// Tự sinh mã DEV_xxx
-const generateDeviceId = (list) => {
-    const nextNumber = list.length + 1;
-    return "DEV_" + String(nextNumber).padStart(3, "0");
-};
-
-// CREATE: thêm thiết bị mới
-const createDevice = (list, newDev) => {
-    if (!validateDevice(newDev)) {
-        return false;
-    }
-
-    const device = {
-        id: generateDeviceId(list),
-        name: newDev.name,
-        room: newDev.room,
-        isActive: newDev.isActive ?? false,
-        powerWatts: newDev.powerWatts
-    };
-
-    list.push(device);
-
-    return true;
-};
-
-// READ: đọc thiết bị theo phòng
-const readDevicesByRoom = (list, roomName) => {
-    return list.filter((device) => {
-        return device.room === roomName;
-    });
-};
-
-// UPDATE: cập nhật thiết bị
-const updateDevice = (list, id, updateData) => {
-    const targetDevice = list.find((device) => {
-        return device.id === id;
-    });
-
-    if (targetDevice === undefined) {
-        return false;
-    }
-
-    // Dùng !== undefined để không bỏ qua false hoặc 0
-    if (updateData.name !== undefined) {
-        targetDevice.name = updateData.name;
-    }
-
-    if (updateData.room !== undefined) {
-        targetDevice.room = updateData.room;
-    }
-
-    if (updateData.isActive !== undefined) {
-        targetDevice.isActive = updateData.isActive;
-    }
-
-    if (updateData.powerWatts !== undefined) {
-        if (updateData.powerWatts > 0) {
-            targetDevice.powerWatts = updateData.powerWatts;
+// Tim vi tri thue bao theo ma
+function findSubscriptionIndex(subscriptionId) {
+    for (let i = 0; i < subscriptions.length; i++) {
+        if (
+            subscriptions[i].subscriptionId ===
+            subscriptionId.trim().toUpperCase()
+        ) {
+            return i;
         }
     }
 
-    return true;
-};
+    return -1;
+}
 
-// DELETE: xóa thiết bị
-const deleteDevice = (list, id) => {
-    const deviceIndex = list.findIndex((device) => {
-        return device.id === id;
-    });
+// Tao ma thue bao moi
+function generateSubscriptionId() {
+    let subscriptionId;
 
-    if (deviceIndex === -1) {
-        return false;
+    do {
+        subscriptionId = "SUB_" +
+            String(subscriptionCounter).padStart(3, "0");
+
+        subscriptionCounter++;
+    } while (findSubscriptionIndex(subscriptionId) !== -1);
+
+    return subscriptionId;
+}
+
+// Chon gioi han thiet bi theo goi
+function getDeviceLimit(planTier) {
+    if (planTier === "PERSONAL") {
+        return PERSONAL_DEVICE_LIMIT;
     }
 
-    list.splice(deviceIndex, 1);
+    if (planTier === "FAMILY") {
+        return FAMILY_DEVICE_LIMIT;
+    }
 
-    return true;
-};
+    return -1;
+}
 
+// Them thue bao moi
+function addSubscription() {
+    console.log("\n===== THEM THUE BAO MOI =====");
 
-// ===============================
-// KIỂM THỬ CRUD
-// ===============================
+    const customerName = prompt("Nhap ten khach hang:");
 
-console.log("===== DANH SACH BAN DAU =====");
-console.log(devices);
+    if (customerName === null || customerName.trim() === "") {
+        console.log("Ten khach hang khong duoc de trong.");
+        return;
+    }
 
+    const planInput = prompt(
+        "Chon goi dich vu:\n1. PERSONAL\n2. FAMILY"
+    );
 
-// CREATE
-console.log("===== CREATE =====");
+    if (planInput === null) {
+        console.log("Da huy thao tac.");
+        return;
+    }
 
-const newDevice = {
-    name: "May loc khong khi",
-    room: "Phong khach",
-    isActive: true,
-    powerWatts: 80
-};
+    let planTier;
 
-console.log("Ket qua them:", createDevice(devices, newDevice));
-console.log(devices);
+    switch (planInput.trim()) {
+        case "1":
+            planTier = "PERSONAL";
+            break;
 
+        case "2":
+            planTier = "FAMILY";
+            break;
 
-// READ
-console.log("===== READ THEO PHONG =====");
+        default:
+            console.log("Goi dich vu khong hop le.");
+            return;
+    }
 
-const livingRoomDevices = readDevicesByRoom(devices, "Phong khach");
+    const subscriptionId = generateSubscriptionId();
 
-console.log("Thiet bi phong khach:");
-console.log(livingRoomDevices);
+    const newSubscription = {
+        subscriptionId: subscriptionId,
+        customerName: customerName.trim(),
+        planTier: planTier,
+        deviceLimit: getDeviceLimit(planTier),
+        status: "ACTIVE"
+    };
 
+    subscriptions.push(newSubscription);
 
-// UPDATE
-console.log("===== UPDATE =====");
+    console.log("Them thue bao thanh cong!");
+    console.log("Ma thue bao: " + subscriptionId);
+    console.log("Khach hang: " + customerName.trim());
+    console.log("Goi dich vu: " + planTier);
+}
 
-console.log(
-    "Cap nhat DEV_002:",
-    updateDevice(devices, "DEV_002", {
-        isActive: true,
-        powerWatts: 0
-    })
-);
+// Hien thi danh sach thue bao
+function listSubscriptions() {
+    console.log("\n===== DANH SACH THUE BAO =====");
 
-console.log("DEV_002 sau khi update:");
-console.log(devices[1]);
+    if (subscriptions.length === 0) {
+        console.log("Danh sach thue bao dang trong.");
+        return;
+    }
 
+    console.table(
+        subscriptions.map(function(subscription) {
+            return {
+                "Ma thue bao": subscription.subscriptionId,
+                "Khach hang": subscription.customerName,
+                "Goi dich vu": subscription.planTier,
+                "Gioi han thiet bi": subscription.deviceLimit,
+                "Trang thai": subscription.status
+            };
+        })
+    );
+}
 
-// Kiểm tra trường hợp ID không tồn tại
-console.log(
-    "Update ID khong ton tai:",
-    updateDevice(devices, "DEV_999", {
-        isActive: true
-    })
-);
+// Cap nhat goi dich vu
+function updateSubscription() {
+    console.log("\n===== CAP NHAT GOI DICH VU =====");
 
+    const subscriptionId = prompt("Nhap ma thue bao can cap nhat:");
 
-// DELETE
-console.log("===== DELETE =====");
+    if (subscriptionId === null || subscriptionId.trim() === "") {
+        console.log("Ma thue bao khong duoc de trong.");
+        return;
+    }
 
-console.log(
-    "Xoa DEV_003:",
-    deleteDevice(devices, "DEV_003")
-);
+    const index = findSubscriptionIndex(subscriptionId);
 
-console.log("Danh sach sau khi xoa:");
-console.log(devices);
+    if (index === -1) {
+        console.log("Khong tim thay thue bao.");
+        return;
+    }
 
+    const subscription = subscriptions[index];
 
-// Kiểm tra xóa ID không tồn tại
-console.log(
-    "Xoa ID khong ton tai:",
-    deleteDevice(devices, "DEV_999")
-);
+    if (subscription.status !== "ACTIVE") {
+        console.log("Chi co the cap nhat thue bao dang ACTIVE.");
+        return;
+    }
+
+    console.log("Khach hang: " + subscription.customerName);
+    console.log("Goi hien tai: " + subscription.planTier);
+
+    const planInput = prompt(
+        "Chon goi moi:\n1. PERSONAL\n2. FAMILY"
+    );
+
+    if (planInput === null) {
+        console.log("Da huy thao tac.");
+        return;
+    }
+
+    let newPlanTier;
+
+    switch (planInput.trim()) {
+        case "1":
+            newPlanTier = "PERSONAL";
+            break;
+
+        case "2":
+            newPlanTier = "FAMILY";
+            break;
+
+        default:
+            console.log("Goi dich vu khong hop le.");
+            return;
+    }
+
+    subscription.planTier = newPlanTier;
+    subscription.deviceLimit = getDeviceLimit(newPlanTier);
+
+    console.log("Cap nhat goi dich vu thanh cong!");
+    console.log("Goi moi: " + subscription.planTier);
+    console.log("Gioi han thiet bi: " + subscription.deviceLimit);
+}
+
+// Huy thue bao
+function deleteSubscription() {
+    console.log("\n===== HUY THUE BAO =====");
+
+    const subscriptionId = prompt("Nhap ma thue bao can huy:");
+
+    if (subscriptionId === null || subscriptionId.trim() === "") {
+        console.log("Ma thue bao khong duoc de trong.");
+        return;
+    }
+
+    const index = findSubscriptionIndex(subscriptionId);
+
+    if (index === -1) {
+        console.log("Khong tim thay thue bao.");
+        return;
+    }
+
+    const subscription = subscriptions[index];
+
+    const confirmed = confirm(
+        "Ban co chac chan muon huy thue bao " +
+        subscription.subscriptionId +
+        " cua " + subscription.customerName + "?"
+    );
+
+    if (!confirmed) {
+        console.log("Da huy thao tac xoa.");
+        return;
+    }
+
+    subscriptions.splice(index, 1);
+
+    console.log("Huy thue bao thanh cong: " + subscriptionId.trim().toUpperCase());
+}
+
+// Hien thi menu quan tri
+function displayMenu() {
+    console.log("\n======================================");
+    console.log("   RIKKEISTREAM - QUAN LY THUE BAO");
+    console.log("======================================");
+    console.log("1. Them thue bao moi");
+    console.log("2. Hien thi danh sach thue bao");
+    console.log("3. Cap nhat goi dich vu");
+    console.log("4. Huy thue bao");
+    console.log("5. Thoat chuong trinh");
+    console.log("======================================");
+}
+
+// Ham main dieu phoi chuong trinh
+function main() {
+    let menuChoice;
+
+    do {
+        displayMenu();
+
+        const input = prompt("Nhap lua chon (1-5):");
+
+        if (input === null) {
+            menuChoice = "5";
+        } else {
+            menuChoice = input.trim();
+        }
+
+        switch (menuChoice) {
+            case "1":
+                addSubscription();
+                break;
+
+            case "2":
+                listSubscriptions();
+                break;
+
+            case "3":
+                updateSubscription();
+                break;
+
+            case "4":
+                deleteSubscription();
+                break;
+
+            case "5":
+                console.log("Da thoat chuong trinh RikkeiStream.");
+                break;
+
+            default:
+                console.log("Lua chon khong hop le. Vui long nhap 1-5.");
+        }
+    } while (menuChoice !== "5");
+}
+
+// Khoi dong ung dung
+main();

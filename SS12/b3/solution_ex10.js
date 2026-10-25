@@ -1,201 +1,267 @@
-// ==========================================
-// 1. FUNCTION DECLARATION
-// ==========================================
 
-// Function Declaration được hoisting.
-// Có thể gọi hàm trước khi khai báo.
+"use strict";
 
-console.log(addNumbers(10, 20));
+// =====================================
+// 1. DU LIEU BAN DAU
+// =====================================
 
-function addNumbers(a, b) {
-    return a + b;
-}
-
-
-// ==========================================
-// 2. FUNCTION EXPRESSION
-// ==========================================
-
-// Function Expression không được hoisting.
-// Phải khai báo hàm trước khi gọi.
-
-const multiplyNumbers = function (a, b) {
-    return a * b;
-};
-
-console.log(multiplyNumbers(10, 20));
-
-
-// ==========================================
-// 3. ARROW FUNCTION
-// ==========================================
-
-// Arrow Function cũng phải được khai báo trước khi gọi.
-
-const subtractNumbers = (a, b) => {
-    return a - b;
-};
-
-console.log(subtractNumbers(30, 10));
-
-
-// ==========================================
-// 4. ARROW FUNCTION - IMPLICIT RETURN
-// ==========================================
-
-const divideNumbers = (a, b) => a / b;
-
-console.log(divideNumbers(20, 5));
-
-
-// ==========================================
-// 5. SO SÁNH THIS
-// ==========================================
-
-const smartHome = {
-    name: "Smart Home",
-
-    normalFunction: function () {
-        console.log("Function Expression this:", this.name);
-    },
-
-    arrowFunction: () => {
-        console.log("Arrow Function this:", this.name);
-    }
-};
-
-smartHome.normalFunction();
-smartHome.arrowFunction();
-
-
-// ==========================================
-// 6. SO SÁNH ARGUMENTS
-// ==========================================
-
-function declarationArguments() {
-    console.log("Function Declaration arguments:", arguments);
-}
-
-const expressionArguments = function () {
-    console.log("Function Expression arguments:", arguments);
-};
-
-const arrowArguments = (...values) => {
-    console.log("Arrow Function arguments thay bằng rest:", values);
-};
-
-declarationArguments(10, 20, 30);
-expressionArguments(40, 50, 60);
-arrowArguments(70, 80, 90);
-
-
-// ==========================================
-// 7. CRUD SMART HOME - DÙNG ARROW FUNCTION
-// ==========================================
-
-const devices = [
+const subscriptions = [
     {
-        id: "DEV_001",
-        name: "Smart TV",
-        room: "Phong khach",
-        powerWatts: 120
+        subscriptionId: "SUB_001",
+        customerName: "Nguyen Van An",
+        planTier: "PERSONAL",
+        deviceLimit: 1
     },
     {
-        id: "DEV_002",
-        name: "Dieu hoa",
-        room: "Phong ngu",
-        powerWatts: 1000
+        subscriptionId: "SUB_002",
+        customerName: "Tran Thi Mai",
+        planTier: "FAMILY",
+        deviceLimit: 5
     }
 ];
 
-// CREATE
-const createDevice = (list, newDevice) => {
-    list.push(newDevice);
-    return true;
-};
+// =====================================
+// 2. CAC HAM CHUC NANG DOC LAP
+// =====================================
 
-// READ
-const readDevicesByRoom = (list, roomName) => {
-    return list.filter((device) => {
-        return device.room === roomName;
+// Chuc nang 1: Hien thi danh sach thue bao
+function listSubscriptions() {
+    console.log("\n===== DANH SACH THUE BAO =====");
+
+    if (subscriptions.length === 0) {
+        console.log("Danh sach dang trong.");
+        return;
+    }
+
+    console.table(subscriptions);
+}
+
+// Chuc nang 2: Them thue bao
+function addSubscription() {
+    console.log("\n===== THEM THUE BAO =====");
+
+    const customerName = prompt("Nhap ten khach hang:");
+
+    if (customerName === null || customerName.trim() === "") {
+        console.log("Ten khach hang khong hop le.");
+        return;
+    }
+
+    const planChoice = prompt(
+        "Chon goi dich vu:\n1. PERSONAL\n2. FAMILY"
+    );
+
+    if (planChoice === null) {
+        console.log("Da huy thao tac.");
+        return;
+    }
+
+    let planTier;
+    let deviceLimit;
+
+    switch (planChoice.trim()) {
+        case "1":
+            planTier = "PERSONAL";
+            deviceLimit = 1;
+            break;
+
+        case "2":
+            planTier = "FAMILY";
+            deviceLimit = 5;
+            break;
+
+        default:
+            console.log("Goi dich vu khong hop le.");
+            return;
+    }
+
+    const subscriptionId = "SUB_" +
+        String(subscriptions.length + 1).padStart(3, "0");
+
+    subscriptions.push({
+        subscriptionId: subscriptionId,
+        customerName: customerName.trim(),
+        planTier: planTier,
+        deviceLimit: deviceLimit
     });
-};
 
-// UPDATE
-const updateDevice = (list, id, updateData) => {
-    const targetDevice = list.find((device) => {
-        return device.id === id;
-    });
+    console.log("Them thue bao thanh cong!");
+}
 
-    if (targetDevice === undefined) {
-        return false;
+// Chuc nang 3: Cap nhat goi dich vu
+function updateSubscription() {
+    console.log("\n===== CAP NHAT THUE BAO =====");
+
+    const subscriptionId = prompt("Nhap ma thue bao:");
+
+    if (subscriptionId === null || subscriptionId.trim() === "") {
+        console.log("Ma thue bao khong hop le.");
+        return;
     }
 
-    if (updateData.name !== undefined) {
-        targetDevice.name = updateData.name;
+    let foundSubscription = null;
+
+    for (let i = 0; i < subscriptions.length; i++) {
+        if (
+            subscriptions[i].subscriptionId ===
+            subscriptionId.trim().toUpperCase()
+        ) {
+            foundSubscription = subscriptions[i];
+            break;
+        }
     }
 
-    if (updateData.powerWatts !== undefined) {
-        targetDevice.powerWatts = updateData.powerWatts;
+    if (foundSubscription === null) {
+        console.log("Khong tim thay thue bao.");
+        return;
     }
 
-    return true;
-};
+    const planChoice = prompt(
+        "Chon goi moi:\n1. PERSONAL\n2. FAMILY"
+    );
 
-// DELETE
-const deleteDevice = (list, id) => {
-    const deviceIndex = list.findIndex((device) => {
-        return device.id === id;
-    });
-
-    if (deviceIndex === -1) {
-        return false;
+    if (planChoice === null) {
+        console.log("Da huy thao tac.");
+        return;
     }
 
-    list.splice(deviceIndex, 1);
+    switch (planChoice.trim()) {
+        case "1":
+            foundSubscription.planTier = "PERSONAL";
+            foundSubscription.deviceLimit = 1;
+            break;
 
-    return true;
-};
+        case "2":
+            foundSubscription.planTier = "FAMILY";
+            foundSubscription.deviceLimit = 5;
+            break;
 
+        default:
+            console.log("Goi dich vu khong hop le.");
+            return;
+    }
 
-// ==========================================
-// 8. KIỂM THỬ
-// ==========================================
+    console.log("Cap nhat thue bao thanh cong!");
+}
 
-console.log("===== CRUD SMART HOME =====");
+// Chuc nang 4: Xoa thue bao
+function deleteSubscription() {
+    console.log("\n===== XOA THUE BAO =====");
 
-createDevice(devices, {
-    id: "DEV_003",
-    name: "Smart Light",
-    room: "Phong khach",
-    powerWatts: 20
-});
+    const subscriptionId = prompt("Nhap ma thue bao can xoa:");
 
-console.log("Sau CREATE:");
-console.log(devices);
+    if (subscriptionId === null || subscriptionId.trim() === "") {
+        console.log("Ma thue bao khong hop le.");
+        return;
+    }
 
-console.log("READ Phong khach:");
-console.log(readDevicesByRoom(devices, "Phong khach"));
+    let foundIndex = -1;
 
-console.log(
-    "UPDATE DEV_001:",
-    updateDevice(devices, "DEV_001", {
-        powerWatts: 150
-    })
-);
+    for (let i = 0; i < subscriptions.length; i++) {
+        if (
+            subscriptions[i].subscriptionId ===
+            subscriptionId.trim().toUpperCase()
+        ) {
+            foundIndex = i;
+            break;
+        }
+    }
 
-console.log("Sau UPDATE:");
-console.log(devices);
+    if (foundIndex === -1) {
+        console.log("Khong tim thay thue bao.");
+        return;
+    }
 
-console.log(
-    "DELETE DEV_002:",
-    deleteDevice(devices, "DEV_002")
-);
+    subscriptions.splice(foundIndex, 1);
 
-console.log("Sau DELETE:");
-console.log(devices);
+    console.log("Xoa thue bao thanh cong!");
+}
 
-console.log(
-    "DELETE DEV_999:",
-    deleteDevice(devices, "DEV_999")
-);
+// Chuc nang 5: Thong ke so luong thue bao
+function countSubscriptions() {
+    console.log("\n===== THONG KE =====");
+    console.log("Tong so thue bao: " + subscriptions.length);
+
+    let personalCount = 0;
+    let familyCount = 0;
+
+    for (let i = 0; i < subscriptions.length; i++) {
+        if (subscriptions[i].planTier === "PERSONAL") {
+            personalCount++;
+        } else if (subscriptions[i].planTier === "FAMILY") {
+            familyCount++;
+        }
+    }
+
+    console.log("Goi PERSONAL: " + personalCount);
+    console.log("Goi FAMILY: " + familyCount);
+}
+
+// =====================================
+// 3. MENU NGAN GON - MODULAR ARCHITECTURE
+// =====================================
+
+function displayMenu() {
+    console.log("\n================================");
+    console.log("   QUAN LY THUE BAO CLOUD");
+    console.log("================================");
+    console.log("1. Hien thi danh sach");
+    console.log("2. Them thue bao");
+    console.log("3. Cap nhat thue bao");
+    console.log("4. Xoa thue bao");
+    console.log("5. Thong ke");
+    console.log("6. Thoat");
+    console.log("================================");
+}
+
+// Ham main chi dieu phoi luong chuong trinh
+function main() {
+    let menuChoice;
+
+    do {
+        displayMenu();
+
+        const input = prompt("Nhap lua chon (1-6):");
+
+        if (input === null) {
+            menuChoice = "6";
+        } else {
+            menuChoice = input.trim();
+        }
+
+        switch (menuChoice) {
+            case "1":
+                listSubscriptions();
+                break;
+
+            case "2":
+                addSubscription();
+                break;
+
+            case "3":
+                updateSubscription();
+                break;
+
+            case "4":
+                deleteSubscription();
+                break;
+
+            case "5":
+                countSubscriptions();
+                break;
+
+            case "6":
+                console.log("Da thoat chuong trinh.");
+                break;
+
+            default:
+                console.log("Lua chon khong hop le.");
+        }
+    } while (menuChoice !== "6");
+}
+
+// =====================================
+// 4. KHOI CHAY CHUONG TRINH
+// =====================================
+
+main();
